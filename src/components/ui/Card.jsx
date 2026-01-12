@@ -8,6 +8,7 @@ export default function Card({
   description,
   className = "",
   padding = true,
+  headerAction,
 }) {
   return (
     <div
@@ -19,18 +20,21 @@ export default function Card({
         ${className}
       `}
     >
-      {(title || description) && (
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
-          {title && (
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {title}
-            </h3>
-          )}
-          {description && (
-            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {description}
-            </p>
-          )}
+      {(title || description || headerAction) && (
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+          <div className="flex-shrink-0">
+            {title && (
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {title}
+              </h3>
+            )}
+            {description && (
+              <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {description}
+              </p>
+            )}
+          </div>
+          {headerAction && <div className="flex-1 sm:max-w-md">{headerAction}</div>}
         </div>
       )}
       <div className={padding ? "p-4 sm:p-6" : ""}>{children}</div>

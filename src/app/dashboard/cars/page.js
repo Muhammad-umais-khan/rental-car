@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { Header } from "@/components/layout";
 import { Card, SortableTable } from "@/components/ui";
 import { cars } from "@/data/cars";
@@ -23,6 +24,16 @@ function StatusBadge({ status }) {
 }
 
 export default function CarsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter cars by license plate
+  const filteredCars = useMemo(() => {
+    if (!searchQuery.trim()) return cars;
+    return cars.filter((car) =>
+      car.licensePlate.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   const columns = [
     {
       key: "make",
@@ -118,10 +129,38 @@ export default function CarsPage() {
         </div>
 
         {/* Cars table with sorting */}
-        <Card title="Fleet Inventory" description="Manage your car rental fleet" padding={false}>
+        <Card
+          title="Fleet Inventory"
+          description="Manage your car rental fleet"
+          padding={false}
+          headerAction={
+            <div className="relative w-full">
+              <svg
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by license plate..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2.5 w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          }
+        >
           <SortableTable
             columns={columns}
-            data={cars}
+            data={filteredCars}
             sortableColumns={["year", "dailyRate"]}
             emptyMessage="No cars found. Add your first car to get started."
             mobileRender={(car) => (
