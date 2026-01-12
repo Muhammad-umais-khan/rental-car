@@ -139,24 +139,34 @@ export default async function CarDetailPage({ params }) {
             {/* Quick Actions Card */}
             <Card title="Quick Actions">
               <div className="space-y-2">
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left">
-                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Create Booking
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Create Booking
+                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-1 rounded">
+                    Coming Soon
                   </span>
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left">
-                  <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
-                    <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                      <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Schedule Maintenance
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Schedule Maintenance
+                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-1 rounded">
+                    Coming Soon
                   </span>
                 </button>
               </div>

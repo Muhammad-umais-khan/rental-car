@@ -125,22 +125,25 @@ export function formatCarFromDb(car) {
 }
 
 /**
- * Get cars count by status
+ * Get cars count by status and revenue potential
  */
 export async function getCarStats() {
   const { data, error } = await supabase
     .from("cars")
-    .select("status");
+    .select("status, daily_rate");
 
   if (error) {
     console.error("Error fetching car stats:", error);
     throw error;
   }
 
+  const totalRevenue = data.reduce((sum, car) => sum + parseFloat(car.daily_rate || 0), 0);
+
   return {
     total: data.length,
     available: data.filter(c => c.status === "available").length,
     rented: data.filter(c => c.status === "rented").length,
     maintenance: data.filter(c => c.status === "maintenance").length,
+    totalRevenuePotential: totalRevenue.toFixed(2),
   };
 }
