@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Header } from "@/components/layout";
 import { Card, SortableTable } from "@/components/ui";
-import { cars } from "@/data/cars";
+import { getCars, formatCarFromDb } from "@/lib/cars";
 import Link from "next/link";
 
 /**
@@ -17,14 +17,33 @@ function StatusBadge({ status }) {
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${styles[status]}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${styles[status] || styles.available}`}>
       {status}
     </span>
   );
 }
 
 export default function CarsPage() {
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch cars on mount
+  useEffect(() => {
+    async function fetchCars() {
+      try {
+        setLoading(true);
+        const data = await getCars();
+        setCars(data.map(formatCarFromDb));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCars();
+  }, []);
 
   // Filter cars by license plate
   const filteredCars = useMemo(() => {
@@ -32,7 +51,14 @@ export default function CarsPage() {
     return cars.filter((car) =>
       car.licensePlate.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, cars]);
+
+  // Stats
+  const stats = useMemo(() => ({
+    total: cars.length,
+    available: cars.filter(c => c.status === "available").length,
+    rented: cars.filter(c => c.status === "rented").length,
+  }), [cars]);
 
   const columns = [
     {
@@ -98,6 +124,27 @@ export default function CarsPage() {
     },
   ];
 
+  if (error) {
+    return (
+      <>
+        <Header title="Cars" />
+        <div className="p-4 sm:p-6">
+          <Card>
+            <div className="text-center py-8">
+              <p className="text-red-500 mb-4">Error loading cars: {error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Try again
+              </button>
+            </div>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Header title="Cars">
@@ -116,15 +163,21 @@ export default function CarsPage() {
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">Total Cars</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{cars.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {loading ? "..." : stats.total}
+            </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">Available</p>
-            <p className="text-2xl font-bold text-green-600">{cars.filter(c => c.status === "available").length}</p>
+            <p className="text-2xl font-bold text-green-600">
+              {loading ? "..." : stats.available}
+            </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">Rented</p>
-            <p className="text-2xl font-bold text-yellow-600">{cars.filter(c => c.status === "rented").length}</p>
+            <p className="text-2xl font-bold text-yellow-600">
+              {loading ? "..." : stats.rented}
+            </p>
           </div>
         </div>
 
@@ -158,49 +211,56 @@ export default function CarsPage() {
             </div>
           }
         >
-          <SortableTable
-            columns={columns}
-            data={filteredCars}
-            sortableColumns={["year", "dailyRate"]}
-            emptyMessage="No cars found. Add your first car to get started."
-            mobileRender={(car) => (
-              <div className="p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                      {car.make} {car.model}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {car.year} • {car.color}
-                    </p>
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">Loading cars...</p>
+            </div>
+          ) : (
+            <SortableTable
+              columns={columns}
+              data={filteredCars}
+              sortableColumns={["year", "dailyRate"]}
+              emptyMessage="No cars found. Add your first car to get started."
+              mobileRender={(car) => (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                        {car.make} {car.model}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {car.year} • {car.color}
+                      </p>
+                    </div>
+                    <StatusBadge status={car.status} />
                   </div>
-                  <StatusBadge status={car.status} />
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-xs">
+                      {car.licensePlate}
+                    </span>
+                    <span className="font-medium text-green-600 dark:text-green-400">
+                      ${car.dailyRate}/day
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <a
+                      href={`/dashboard/cars/${car.id}`}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium"
+                    >
+                      View Details
+                    </a>
+                    <a
+                      href={`/dashboard/cars/${car.id}/edit`}
+                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 text-sm font-medium"
+                    >
+                      Edit
+                    </a>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-xs">
-                    {car.licensePlate}
-                  </span>
-                  <span className="font-medium text-green-600 dark:text-green-400">
-                    ${car.dailyRate}/day
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 pt-2 border-t border-gray-100 dark:border-gray-700">
-                  <a
-                    href={`/dashboard/cars/${car.id}`}
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium"
-                  >
-                    View Details
-                  </a>
-                  <a
-                    href={`/dashboard/cars/${car.id}/edit`}
-                    className="text-gray-600 hover:text-gray-800 dark:text-gray-400 text-sm font-medium"
-                  >
-                    Edit
-                  </a>
-                </div>
-              </div>
-            )}
-          />
+              )}
+            />
+          )}
         </Card>
       </div>
     </>

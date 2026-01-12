@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout";
-import { Card, Button } from "@/components/ui";
-import { cars } from "@/data/cars";
+import { Card } from "@/components/ui";
+import { getCarById, formatCarFromDb } from "@/lib/cars";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -15,7 +15,7 @@ function StatusBadge({ status }) {
   };
 
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${styles[status]}`}>
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${styles[status] || styles.available}`}>
       {status}
     </span>
   );
@@ -28,14 +28,21 @@ function DetailRow({ label, value }) {
   return (
     <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
       <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{value}</span>
+      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{value || "N/A"}</span>
     </div>
   );
 }
 
 export default async function CarDetailPage({ params }) {
   const { id } = await params;
-  const car = cars.find((c) => c.id === id);
+  
+  let car;
+  try {
+    const carData = await getCarById(id);
+    car = formatCarFromDb(carData);
+  } catch (error) {
+    notFound();
+  }
 
   if (!car) {
     notFound();
@@ -93,11 +100,10 @@ export default async function CarDetailPage({ params }) {
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
-                    Technical Specs
+                    Status & Pricing
                   </h4>
-                  <DetailRow label="Fuel Type" value={car.fuelType} />
-                  <DetailRow label="Transmission" value={car.transmission} />
-                  <DetailRow label="Mileage" value={`${car.mileage.toLocaleString()} mi`} />
+                  <DetailRow label="Status" value={car.status} />
+                  <DetailRow label="Daily Rate" value={`$${car.dailyRate}`} />
                 </div>
               </div>
             </Card>
@@ -118,13 +124,13 @@ export default async function CarDetailPage({ params }) {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500 dark:text-gray-400">Weekly (7 days)</span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
-                    ${car.dailyRate * 7}
+                    ${(car.dailyRate * 7).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
                   <span className="text-gray-500 dark:text-gray-400">Monthly (30 days)</span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
-                    ${car.dailyRate * 30}
+                    ${(car.dailyRate * 30).toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { use } from "react";
 import { Header } from "@/components/layout";
 import { Button, Input, Select, Card } from "@/components/ui";
-import { cars, carStatuses, fuelTypes, transmissionTypes } from "@/data/cars";
+import { carStatuses } from "@/data/cars";
+import { getCarById, updateCar, formatCarFromDb } from "@/lib/cars";
 import Link from "next/link";
 
 const initialErrors = {};
@@ -13,7 +14,8 @@ const initialErrors = {};
 export default function EditCarPage({ params }) {
   const { id } = use(params);
   const router = useRouter();
-  const car = cars.find((c) => c.id === id);
+  const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     make: "",
@@ -33,21 +35,44 @@ export default function EditCarPage({ params }) {
 
   // Load car data on mount
   useEffect(() => {
-    if (car) {
-      setFormData({
-        make: car.make,
-        model: car.model,
-        year: car.year.toString(),
-        color: car.color,
-        licensePlate: car.licensePlate,
-        dailyRate: car.dailyRate.toString(),
-        status: car.status,
-        mileage: car.mileage.toString(),
-        fuelType: car.fuelType,
-        transmission: car.transmission,
-      });
+    async function fetchCar() {
+      try {
+        const carData = await getCarById(id);
+        const formattedCar = formatCarFromDb(carData);
+        setCar(formattedCar);
+        setFormData({
+          make: formattedCar.make,
+          model: formattedCar.model,
+          year: formattedCar.year.toString(),
+          color: formattedCar.color,
+          licensePlate: formattedCar.licensePlate,
+          dailyRate: formattedCar.dailyRate.toString(),
+          status: formattedCar.status,
+        });
+      } catch (error) {
+        console.error("Error fetching car:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [car]);
+    fetchCar();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <>
+        <Header title="Loading..." />
+        <div className="p-6">
+          <Card>
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">Loading car data...</p>
+            </div>
+          </Card>
+        </div>
+      </>
+    );
+  }
 
   if (!car) {
     return (
@@ -110,21 +135,6 @@ export default function EditCarPage({ params }) {
       newErrors.dailyRate = "Daily rate must be a positive number";
     }
 
-    if (!formData.fuelType) {
-      newErrors.fuelType = "Fuel type is required";
-    }
-
-    if (!formData.transmission) {
-      newErrors.transmission = "Transmission is required";
-    }
-
-    if (formData.mileage) {
-      const mileage = parseInt(formData.mileage);
-      if (isNaN(mileage) || mileage < 0) {
-        newErrors.mileage = "Mileage must be a positive number";
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -146,24 +156,18 @@ export default function EditCarPage({ params }) {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await updateCar(id, formData);
+      setSubmitSuccess(true);
 
-    // In a real app, this would be an API call to update the car
-    console.log("Updated car data:", {
-      id: car.id,
-      ...formData,
-      year: parseInt(formData.year),
-      dailyRate: parseFloat(formData.dailyRate),
-      mileage: formData.mileage ? parseInt(formData.mileage) : 0,
-    });
-
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-
-    setTimeout(() => {
-      router.push(`/dashboard/cars/${id}`);
-    }, 1500);
+      setTimeout(() => {
+        router.push(`/dashboard/cars/${id}`);
+      }, 1500);
+    } catch (error) {
+      setErrors({ submit: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -246,42 +250,12 @@ export default function EditCarPage({ params }) {
               </div>
             </div>
 
-            {/* Technical Details Section */}
+            {/* License & Rental Details Section */}
             <div>
               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Technical Details
+                License & Rental Details
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="Fuel Type"
-                  name="fuelType"
-                  value={formData.fuelType}
-                  onChange={handleChange}
-                  options={fuelTypes}
-                  placeholder="Select fuel type"
-                  error={errors.fuelType}
-                  required
-                />
-                <Select
-                  label="Transmission"
-                  name="transmission"
-                  value={formData.transmission}
-                  onChange={handleChange}
-                  options={transmissionTypes}
-                  placeholder="Select transmission"
-                  error={errors.transmission}
-                  required
-                />
-                <Input
-                  label="Mileage"
-                  name="mileage"
-                  type="number"
-                  value={formData.mileage}
-                  onChange={handleChange}
-                  placeholder="e.g., 15000"
-                  error={errors.mileage}
-                  min="0"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
                   label="License Plate"
                   name="licensePlate"
@@ -291,15 +265,6 @@ export default function EditCarPage({ params }) {
                   error={errors.licensePlate}
                   required
                 />
-              </div>
-            </div>
-
-            {/* Rental Details Section */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Rental Details
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="Daily Rate ($)"
                   name="dailyRate"

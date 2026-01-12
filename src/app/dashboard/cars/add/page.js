@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout";
 import { Button, Input, Select, Card } from "@/components/ui";
-import { carStatuses, fuelTypes, transmissionTypes } from "@/data/cars";
+import { carStatuses } from "@/data/cars";
+import { createCar } from "@/lib/cars";
 import Link from "next/link";
 
 const initialFormState = {
@@ -15,9 +16,6 @@ const initialFormState = {
   licensePlate: "",
   dailyRate: "",
   status: "available",
-  mileage: "",
-  fuelType: "",
-  transmission: "",
 };
 
 const initialErrors = {};
@@ -73,24 +71,6 @@ export default function AddCarPage() {
       newErrors.dailyRate = "Daily rate must be a positive number";
     }
 
-    // Fuel type validation
-    if (!formData.fuelType) {
-      newErrors.fuelType = "Fuel type is required";
-    }
-
-    // Transmission validation
-    if (!formData.transmission) {
-      newErrors.transmission = "Transmission is required";
-    }
-
-    // Mileage validation (optional but must be valid if provided)
-    if (formData.mileage) {
-      const mileage = parseInt(formData.mileage);
-      if (isNaN(mileage) || mileage < 0) {
-        newErrors.mileage = "Mileage must be a positive number";
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -113,24 +93,19 @@ export default function AddCarPage() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await createCar(formData);
+      setSubmitSuccess(true);
 
-    // In a real app, this would be an API call to save the car
-    console.log("Car data to save:", {
-      ...formData,
-      year: parseInt(formData.year),
-      dailyRate: parseFloat(formData.dailyRate),
-      mileage: formData.mileage ? parseInt(formData.mileage) : 0,
-    });
-
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-
-    // Reset form after success
-    setTimeout(() => {
-      router.push("/dashboard/cars");
-    }, 1500);
+      // Redirect after success
+      setTimeout(() => {
+        router.push("/dashboard/cars");
+      }, 1500);
+    } catch (error) {
+      setErrors({ submit: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -219,42 +194,12 @@ export default function AddCarPage() {
               </div>
             </div>
 
-            {/* Technical Details Section */}
+            {/* License & Rental Details Section */}
             <div>
               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Technical Details
+                License & Rental Details
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="Fuel Type"
-                  name="fuelType"
-                  value={formData.fuelType}
-                  onChange={handleChange}
-                  options={fuelTypes}
-                  placeholder="Select fuel type"
-                  error={errors.fuelType}
-                  required
-                />
-                <Select
-                  label="Transmission"
-                  name="transmission"
-                  value={formData.transmission}
-                  onChange={handleChange}
-                  options={transmissionTypes}
-                  placeholder="Select transmission"
-                  error={errors.transmission}
-                  required
-                />
-                <Input
-                  label="Mileage"
-                  name="mileage"
-                  type="number"
-                  value={formData.mileage}
-                  onChange={handleChange}
-                  placeholder="e.g., 15000"
-                  error={errors.mileage}
-                  min="0"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
                   label="License Plate"
                   name="licensePlate"
@@ -264,15 +209,6 @@ export default function AddCarPage() {
                   error={errors.licensePlate}
                   required
                 />
-              </div>
-            </div>
-
-            {/* Rental Details Section */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Rental Details
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="Daily Rate ($)"
                   name="dailyRate"
