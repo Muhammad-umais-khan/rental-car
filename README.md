@@ -19,11 +19,11 @@ A modern admin dashboard for managing a car rental fleet, built with Next.js 16 
 
 Honestly, the Server vs Client Component distinction confused me at first. But once it clicked, it made a lot of sense. I kept most pages as Server Components by default—the dashboard stats, car listings, detail pages—because they don't need JavaScript on the client and load faster that way. Better for SEO too, apparently.
 
-The tricky part was the sortable table. Sorting requires `useState` and user interaction, so that *had* to be a Client Component. My solution was to keep the page itself as a Server Component that fetches the data, then pass it down to a `SortableTable` client component. Best of both worlds. The data fetching happens on the server, the interactive bits happen on the client. Took me a while to figure out that pattern but it's pretty elegant once you see it.
+The tricky part was the sortable table. Sorting requires `useState` and user interaction, so that _had_ to be a Client Component. My solution was to keep the page itself as a Server Component that fetches the data, then pass it down to a `SortableTable` client component. Best of both worlds. The data fetching happens on the server, the interactive bits happen on the client. Took me a while to figure out that pattern but it's pretty elegant once you see it.
 
 ### Professional Workflow
 
-One thing I'll definitely do differently next time: plan the folder structure *before* writing any code. I started coding right away and had to reorganize things midway through. Annoying.
+One thing I'll definitely do differently next time: plan the folder structure _before_ writing any code. I started coding right away and had to reorganize things midway through. Annoying.
 
 What worked well was keeping components separated by purpose—`/components/ui` for reusable stuff like buttons and inputs, `/components/layout` for the shell, sidebar, header. When I needed to add the mobile menu later, I knew exactly where everything lived. Would've been a nightmare otherwise.
 
@@ -50,7 +50,7 @@ I tried to treat this like a real client project, not just a toy demo. That mean
 - Making the UI consistent across all pages
 - Adding features the brief didn't ask for (search, mobile support, real database) because a real product would need them
 
-Could I have done the bare minimum? Sure. But then I wouldn't have learned as much, and honestly the dashboard wouldn't feel *finished*. There's something satisfying about a project that actually works end-to-end.
+Could I have done the bare minimum? Sure. But then I wouldn't have learned as much, and honestly the dashboard wouldn't feel _finished_. There's something satisfying about a project that actually works end-to-end.
 
 ---
 
