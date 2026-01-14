@@ -1,6 +1,35 @@
 import { supabase } from "./supabase";
 
 /**
+ * Custom error class for car-related operations
+ */
+class CarServiceError extends Error {
+  constructor(message, originalError = null) {
+    super(message);
+    this.name = "CarServiceError";
+    this.originalError = originalError;
+  }
+}
+
+/**
+ * Handle Supabase errors consistently
+ */
+function handleError(operation, error) {
+  console.error(`Error ${operation}:`, error);
+  
+  // Map common errors to user-friendly messages
+  const userMessage = {
+    fetch: "Failed to load cars. Please refresh the page.",
+    create: "Failed to add car. Please try again.",
+    update: "Failed to update car. Please try again.",
+    delete: "Failed to delete car. Please try again.",
+    stats: "Failed to load statistics. Please refresh the page.",
+  };
+  
+  throw new CarServiceError(userMessage[operation] || "An unexpected error occurred.", error);
+}
+
+/**
  * Fetch all cars from the database
  */
 export async function getCars() {
@@ -10,8 +39,7 @@ export async function getCars() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching cars:", error);
-    throw error;
+    handleError("fetch", error);
   }
 
   return data;
@@ -28,8 +56,7 @@ export async function getCarById(id) {
     .single();
 
   if (error) {
-    console.error("Error fetching car:", error);
-    throw error;
+    handleError("fetch", error);
   }
 
   return data;
@@ -54,8 +81,7 @@ export async function createCar(carData) {
     .single();
 
   if (error) {
-    console.error("Error creating car:", error);
-    throw error;
+    handleError("create", error);
   }
 
   return data;
@@ -82,8 +108,7 @@ export async function updateCar(id, carData) {
     .single();
 
   if (error) {
-    console.error("Error updating car:", error);
-    throw error;
+    handleError("update", error);
   }
 
   return data;
@@ -99,8 +124,7 @@ export async function deleteCar(id) {
     .eq("id", id);
 
   if (error) {
-    console.error("Error deleting car:", error);
-    throw error;
+    handleError("delete", error);
   }
 
   return true;
@@ -133,8 +157,7 @@ export async function getCarStats() {
     .select("status, daily_rate");
 
   if (error) {
-    console.error("Error fetching car stats:", error);
-    throw error;
+    handleError("stats", error);
   }
 
   const totalRevenue = data.reduce((sum, car) => sum + parseFloat(car.daily_rate || 0), 0);

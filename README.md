@@ -39,7 +39,7 @@ Look, I'll be honest—I used AI to skip the boring parts. Here's what I mean:
 
 **CSS Debugging:** The sidebar layout gave me issues. Stuff like getting the mobile overlay to work, the transform transitions, the z-index stacking. Instead of googling for 30 minutes, I just described what was broken and got working Tailwind classes back. Saved me a headache.
 
-Is this cheating? I don't think so. I still had to understand what the code does, debug when things broke, and make judgment calls on the architecture. The AI just handled the parts that don't require creativity.
+Is this cheating? I don't think so. I stilll had to understand what the code does, debug when things broke, and make judgment calls on the architecture. The AI just handled the parts that don't require creativity.
 
 ### Ownership
 
