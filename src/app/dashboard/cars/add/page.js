@@ -160,6 +160,7 @@ export default function AddCarPage() {
                   placeholder="e.g., Toyota"
                   error={errors.make}
                   required
+                  disabled={isSubmitting}
                 />
                 <Input
                   label="Model"
@@ -169,6 +170,7 @@ export default function AddCarPage() {
                   placeholder="e.g., Camry"
                   error={errors.model}
                   required
+                  disabled={isSubmitting}
                 />
                 <Input
                   label="Year"
@@ -181,6 +183,7 @@ export default function AddCarPage() {
                   min="1990"
                   max={new Date().getFullYear() + 1}
                   required
+                  disabled={isSubmitting}
                 />
                 <Input
                   label="Color"
@@ -190,6 +193,7 @@ export default function AddCarPage() {
                   placeholder="e.g., Silver"
                   error={errors.color}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -208,6 +212,7 @@ export default function AddCarPage() {
                   placeholder="e.g., ABC-1234"
                   error={errors.licensePlate}
                   required
+                  disabled={isSubmitting}
                 />
                 <Input
                   label="Daily Rate ($)"
@@ -220,6 +225,7 @@ export default function AddCarPage() {
                   min="1"
                   step="0.01"
                   required
+                  disabled={isSubmitting}
                 />
                 <Select
                   label="Status"
@@ -229,6 +235,7 @@ export default function AddCarPage() {
                   options={carStatuses}
                   placeholder="Select status"
                   error={errors.status}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>

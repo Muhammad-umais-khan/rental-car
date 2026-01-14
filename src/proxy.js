@@ -11,14 +11,14 @@ export function proxy(request) {
   // If accessing public route, allow
   if (isPublicRoute) {
     // If already logged in and trying to access login, redirect to dashboard
-    if (pathname === "/login" && authToken?.value === "authenticated") {
+    if (pathname === "/login" && authToken?.value) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     return NextResponse.next();
   }
 
   // If not authenticated and trying to access protected route
-  if (!authToken || authToken.value !== "authenticated") {
+  if (!authToken?.value) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

@@ -26,12 +26,15 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        setPassword(""); // Clear password before redirect
         router.push("/dashboard");
         router.refresh();
       } else {
+        setPassword(""); // Reset password on failed attempt
         setError(data.error || "Invalid password");
       }
     } catch (err) {
+      setPassword(""); // Reset password on error
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -122,7 +125,8 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  disabled={isLoading}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
